@@ -1,0 +1,88 @@
+---
+title: "What is Path Analysis?"
+author: "Bahareh Jozranjbar"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+
+--- Regression Plot: Engagement vs. Satisfaction ---
+```{r}
+
+
+# Load required library
+library(ggplot2)
+
+# Set seed for reproducibility and simulate some data:
+set.seed(123)
+n <- 30
+engagement <- runif(n, 4, 9)
+overall_satisfaction <- 0.7 * engagement + rnorm(n, 0, 0.7)
+df <- data.frame(Engagement = engagement, Satisfaction = overall_satisfaction)
+
+# Create the regression plot:
+regression_plot <- ggplot(df, aes(x = Engagement, y = Satisfaction)) +
+  geom_point(color = "steelblue", size = 3) +
+  geom_smooth(method = "lm", se = FALSE, color = "darkred") +
+  labs(title = "Does More Engagement Mean Higher Satisfaction?",
+       x = "Engagement (scale 1-10)",
+       y = "Overall Satisfaction (scale 1-10)") +
+  theme_minimal()
+
+# Display the plot
+print(regression_plot)
+
+# Save the plot to a PNG file
+ggsave("regression_plot.png", plot = regression_plot, width = 6, height = 4, dpi = 300)
+
+
+```
+
+--- Path Analysis Diagram: Modeling Direct and Indirect Effects ---
+
+```{r}
+
+# Load required libraries for DiagrammeR
+library(DiagrammeR)
+library(DiagrammeRsvg)
+library(rsvg)
+
+# Create a path analysis diagram.
+# In this example, "Engagement" and "Usability" influence "Emotional Response",
+# which in turn influences "Satisfaction". There are also direct paths from Engagement
+# and Usability to Satisfaction.
+path_graph <- grViz("
+digraph path_analysis {
+  graph [layout = dot, rankdir = LR]  // Use a left-to-right layout
+  node [shape = box, fontname = Helvetica, fontsize = 10, style = filled, fillcolor = lightblue]
+  
+  // Define nodes
+  Engagement [label='Engagement']
+  Usability [label='Usability']
+  EmotionalResponse [label='Emotional Response']
+  Satisfaction [label='Satisfaction']
+  
+  // Define directed paths with coefficients (example values)
+  Engagement -> EmotionalResponse [label='0.50']
+  Usability -> EmotionalResponse [label='0.30']
+  EmotionalResponse -> Satisfaction [label='0.60']
+  Engagement -> Satisfaction [label='0.20']
+  Usability -> Satisfaction [label='0.40']
+}
+")
+
+# Render the DiagrammeR graph (this should open in your RStudio Viewer)
+print(path_graph)
+
+# Export the DiagrammeR graph to SVG and then save as PNG:
+svg_output <- export_svg(path_graph)
+rsvg_png(charToRaw(svg_output), file = "path_analysis_diagram.png", width = 800, height = 600)
+
+```
+
+
